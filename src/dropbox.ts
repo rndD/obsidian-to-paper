@@ -5,6 +5,7 @@ const API_URLS = {
   paper_create: 'https://api.dropboxapi.com/2/files/paper/create',
   share_link:
     'https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings',
+  list_shared_links: 'https://api.dropboxapi.com/2/sharing/list_shared_links',
 }
 
 export const uploadToPaper = async (
@@ -34,14 +35,31 @@ export const uploadToPaper = async (
   if (json.error) {
     throw new Error(json.error_summary)
   }
-  return json.url
-  //   const resultPath = json.result_path
+  const resultPath = json.result_path
+
+  const response2 = await fetch(API_URLS.list_shared_links, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      path: resultPath,
+      direct_only: true,
+    }),
+  })
+  const json2 = await response2.json()
+  if (json2.error) {
+    throw new Error(json2.error_summary)
+  }
+  const links = json2.links
+  return links[0].url
 
   //   const response2 = await fetch(API_URLS.share_link, {
   //     method: 'POST',
   //     headers: {
   //       Authorization: `Bearer ${apiKey}`,
-  //       'Content-Type': 'application/json'
+  //       'Content-Type': 'application/json',
   //     },
   //     body: JSON.stringify({
   //       path: resultPath,
